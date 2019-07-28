@@ -57,9 +57,13 @@ fi
 if [[ -f "/mnt/user/g/mntchk" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: unionfs is already mounted."
 else
+echo "$(date "+%d.%m.%Y %T") INFO: Cleaning up bad unmount."
+find "/mnt/user/g/" -empty -type d -print -maxdepth 2
+find "/mnt/user/g/" -empty -type d -print -maxdepth 2
+echo "$(date "+%d.%m.%Y %T") INFO: OK."
 echo "$(date "+%d.%m.%Y %T") INFO: Mounting unionfs..."
 unionfs -o cow,allow_other,direct_io,auto_cache,sync_read /mnt/user/rclone_upload/g=RW:/mnt/user/mount_rclone/g=RO /mnt/user/g
-echo "$(date "+%d.%m.%Y %T") INFO: done."
+echo "$(date "+%d.%m.%Y %T") INFO: OK."
 if [[ -f "/mnt/user/g/mntchk" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: Unionfs mounted."
 else
