@@ -1,46 +1,56 @@
 #!/bin/bash
-
-# unmount to be safe
-
-fusermount -uz /mnt/user/mount_unionfs/google_vfs
-fusermount -uz /mnt/user/mount_rclone/google_vfs
-
-# Remove other dummy files
-
-if [[ -f "/mnt/user/appdata/other/rclone/rclone_upload" ]]; then
-
-echo "upload file present - removing dummy file"
-
-rm /mnt/user/appdata/other/rclone/rclone_upload
-
+###########################################################################
+#                    <>       rclone_unmount       <>                     #
+###########################################################################
+#
+sleep 1
+echo "$(date "+%d.%m.%Y %T") INFO: *** Starting rclone_unmount script ***"
+echo "$(date "+%d.%m.%Y %T") INFO: Unmounting "/mnt/user/mount_rclone/g""
+fusermount -uzq /mnt/user/mount_rclone/g
+echo "$(date "+%d.%m.%Y %T") INFO: Unmounting "/mnt/user/g""
+fusermount -uzq /mnt/user/g
+# Delay to let the mounts unmount. #
+echo "$(date "+%d.%m.%Y %T") INFO: Sleep 10 sec"
+sleep 10
+echo "$(date "+%d.%m.%Y %T") INFO: Continuing..."
+# Check if the unmount commands was successful #
+if [[ -f "/mnt/user/mount_rclone/g/mntchk" ]]; then
+echo "$(date "+%d.%m.%Y %T") CRITICAL: Unmounting "/mnt/user/mount_rclone/g" failed! Trying again."
+fusermount -uz /mnt/user/mount_rclone/g
 else
-
-echo "rclone upload already exited properly"
-
+echo "$(date "+%d.%m.%Y %T") INFO: "/mnt/user/mount_rclone/g" is unmounted"
 fi
-
-if [[ -f "/mnt/user/appdata/other/rclone/rclone_cleanup" ]]; then
-
-echo "cleanup file pre﻿sent - removing dummy file"
-
-rm /mnt/user/appdata/other/rclone/rclone_cleanup
-
+if [[ -f "/mnt/user/g/mntchk" ]]; then
+echo "$(date "+%d.%m.%Y %T") CRITICAL: Unmounting "/mnt/user/g" failed! Trying again."
+fusermount -uz /mnt/user/g
 else
-
-echo "cleanup already exited properly"
-
+echo "$(date "+%d.%m.%Y %T") INFO: "/mnt/user/g" is unmounted"
 fi
-
-if [[ -f "/mnt/user/appdata/other/rclone/dockers_started" ]]; then
-
-echo "removing dummy docker check file"
-
-rm /mnt/user/appdata/other/rclone/dockers_started
-
+#######################   Cleanup tracking files   #######################
+#
+if [[ -f "/mnt/user/appdata/other/rclone/rclone_upload_running" ]]; then
+echo "rclone_upload_running present - removing tracker file"
+rm /mnt/user/appdata/other/rclone/rclone_upload_running
 else
-
-echo "docker run once already removed"
-
+echo "rclone_upload_running tracker not present - script is not running"
 fi
-
+if [[ -f "/mnt/user/appdata/other/rclone/rclone_cleanup_running" ]]; then
+echo "rclone_cleanup_running pre﻿sent - removing tracker file"
+rm /mnt/user/appdata/other/rclone/rclone_cleanup_running
+else
+echo "rclone_cleanup_running tracker not present - script is not running"
+fi
+if [[ -f "/mnt/user/appdata/other/rclone/containers_started" ]]; then
+echo "containers_started pre﻿sent - removing tracker file"
+rm /mnt/user/appdata/other/rclone/containers_started
+else
+echo "containers_started tracker not present - script is not running"
+fi
+if [[ -f "/mnt/user/appdata/other/rclone/rclone_mount_running" ]]; then
+echo "rclone_mount_running pre﻿sent - removing tracker file"
+rm /mnt/user/appdata/other/rclone/rclone_mount_running
+else
+echo "rclone_mount_running tracker not present - script is not running"
+fi
+echo "$(date "+%d.%m.%Y %T") INFO: *** rclone_unmount script finished successfully ***"
 exit
