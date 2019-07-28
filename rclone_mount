@@ -57,7 +57,7 @@ fi
 if [[ -f "/mnt/user/g/mntchk" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: unionfs is already mounted."
 else
-echo "$(date "+%d.%m.%Y %T") INFO: Checking for bad unmount ("OK."" = clean unmount):"
+echo "$(date "+%d.%m.%Y %T") INFO: Checking for bad unmount ("OK." = clean unmount):"
 find "/mnt/user/g/" -empty -type d -print -maxdepth 2
 find "/mnt/user/g/" -empty -type d -delete -maxdepth 2
 find "/mnt/user/g/" -empty -type d -delete -maxdepth 2
