@@ -5,7 +5,7 @@
 #
 ##################  Check if script is already running  ###################
 #
-sleep 1
+sleep 10
 echo "$(date "+%d.%m.%Y %T") INFO: *********************       Starting rclone_mount script       *********************"
 echo "$(date "+%d.%m.%Y %T") INFO: Checking if this script is already running."
 if [[ -f "/mnt/user/appdata/other/rclone/rclone_mount_running" ]]; then
