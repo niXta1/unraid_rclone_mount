@@ -4,7 +4,7 @@
 ###########################################################################
 #
 sleep 1
-echo "$(date "+%d.%m.%Y %T") INFO: *** Starting rclone_unmount script ***"
+echo "$(date "+%d.%m.%Y %T") INFO: *********************       Starting rclone_unmount script       *********************"
 echo "$(date "+%d.%m.%Y %T") INFO: Unmounting "/mnt/user/mount_rclone/g""
 fusermount -uzq /mnt/user/mount_rclone/g
 echo "$(date "+%d.%m.%Y %T") INFO: Unmounting "/mnt/user/g""
@@ -52,5 +52,5 @@ rm /mnt/user/appdata/other/rclone/rclone_mount_running
 else
 echo "rclone_mount_running tracker not present - script is not running"
 fi
-echo "$(date "+%d.%m.%Y %T") INFO: *** rclone_unmount script finished successfully ***"
+echo "$(date "+%d.%m.%Y %T") INFO: ********************* rclone_unmount script finished successfully *********************"
 exit

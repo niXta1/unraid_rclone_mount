@@ -6,6 +6,7 @@
 ################  Check if this script is already running  ################
 #
 sleep 1
+echo "$(date "+%d.%m.%Y %T") INFO: *********************       Starting rclone_upload script       *********************"
 echo "$(date "+%d.%m.%Y %T") INFO: *** Starting rclone_upload script ***"
 if [[ -f "/mnt/user/appdata/other/rclone/rclone_upload_running" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: This script is already running. Exiting."
@@ -27,5 +28,5 @@ fi
 #
 rclone move /mnt/user/rclone_upload/g/ gdrive_media_vfs: -vv --drive-chunk-size 512M --checkers 3 --fast-list --transfers 2 --exclude .unionfs/** --exclude *fuse_hidden* --exclude *_HIDDEN --exclude .recycle** --exclude *.backup~* --exclude *.partial~*  --delete-empty-src-dirs --fast-list --bwlimit 8100k --tpslimit 3 --min-age 30m
 rm /mnt/user/appdata/other/rclone/rclone_upload_running
-echo "$(date "+%d.%m.%Y %T") INFO: *** rclone_upload script finished successfully ***"
+echo "$(date "+%d.%m.%Y %T") INFO: ********************* rclone_upload script finished successfully *********************"
 exit

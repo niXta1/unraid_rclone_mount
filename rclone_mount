@@ -6,7 +6,7 @@
 ##################  Check if script is already running  ###################
 #
 sleep 1
-echo "$(date "+%d.%m.%Y %T") INFO: *** Starting rclone_mount script ***"
+echo "$(date "+%d.%m.%Y %T") INFO: *********************       Starting rclone_mount script       *********************"
 echo "$(date "+%d.%m.%Y %T") INFO: Checking if this script is already running."
 if [[ -f "/mnt/user/appdata/other/rclone/rclone_mount_running" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: This script is already running."
@@ -57,11 +57,11 @@ fi
 if [[ -f "/mnt/user/g/mntchk" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: unionfs is already mounted."
 else
-echo "$(date "+%d.%m.%Y %T") INFO: Checking for bad unmount ("OK." = clean unmount):"
-find "/mnt/user/g/" -empty -type d -print -maxdepth 2
-find "/mnt/user/g/" -empty -type d -delete -maxdepth 2
-find "/mnt/user/g/" -empty -type d -delete -maxdepth 2
-echo "$(date "+%d.%m.%Y %T") INFO: OK."
+echo "$(date "+%d.%m.%Y %T") INFO: Checking for bad unmount:"
+tree "/mnt/user/g/" -a -L 1
+echo "$(date "+%d.%m.%Y %T") INFO: \"0 directory, 0 files\" = clean unmount."
+echo "$(date "+%d.%m.%Y %T") INFO: Will try to fix bad unmount if needed."
+find "/mnt/user/g/" -empty -type d -delete -maxdepth 2 -mindepth 1
 echo "$(date "+%d.%m.%Y %T") INFO: Mounting unionfs..."
 unionfs -o cow,allow_other,direct_io,auto_cache,sync_read /mnt/user/rclone_upload/g=RW:/mnt/user/mount_rclone/g=RO /mnt/user/g
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
@@ -85,5 +85,5 @@ fi
 #docker start 'Plex-nvdec'
 #rm /mnt/user/appdata/other/rclone/rclone_mount_running
 #fi
-echo "$(date "+%d.%m.%Y %T") INFO: *** rclone_mount script finished successfully ***"
+echo "$(date "+%d.%m.%Y %T") INFO: ********************* rclone_mount script finished successfully *********************"
 exit

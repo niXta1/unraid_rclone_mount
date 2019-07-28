@@ -6,6 +6,7 @@
 ####################  Check if script already running  ####################
 #
 sleep 1
+echo "$(date "+%d.%m.%Y %T") INFO: *********************       Starting rclone_cleanup script       *********************"
 echo "$(date "+%d.%m.%Y %T") INFO: *** Starting rclone_cleanup script ***"
 if [[ -f "/mnt/user/appdata/other/rclone/rclone_cleanup_running" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: Exiting as is script already running."
@@ -24,5 +25,5 @@ rm "$line"
 done
 find "/mnt/user/g/.unionfs" -mindepth 1 -type d -empty -delete
 rm /mnt/user/appdata/other/rclone/rclone_cleanup_running
-echo "$(date "+%d.%m.%Y %T") INFO: *** rclone_cleanup script finished successfully ***"
+echo "$(date "+%d.%m.%Y %T") INFO: ********************* rclone_cleanup script finished successfully *********************"
 exit
