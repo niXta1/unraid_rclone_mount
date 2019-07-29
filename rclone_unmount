@@ -19,12 +19,14 @@ echo "$(date "+%d.%m.%Y %T") CRITICAL: Unmounting "/mnt/user/mount_rclone/g" fai
 fusermount -uz /mnt/user/mount_rclone/g
 else
 echo "$(date "+%d.%m.%Y %T") INFO: "/mnt/user/mount_rclone/g" is unmounted"
+tree /mnt/user/mount_rclone/g -L 1
 fi
 if [[ -f "/mnt/user/g/mntchk" ]]; then
 echo "$(date "+%d.%m.%Y %T") CRITICAL: Unmounting "/mnt/user/g" failed! Trying again."
 fusermount -uz /mnt/user/g
 else
 echo "$(date "+%d.%m.%Y %T") INFO: "/mnt/user/g" is unmounted"
+tree /mnt/user/g -L 1
 fi
 #######################   Cleanup tracking files   #######################
 #
