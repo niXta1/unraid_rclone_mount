@@ -3,30 +3,41 @@
 #                    <>       rclone_unmount       <>                     #
 ###########################################################################
 #
+##################  Check if script is already running  ###################
+#
 sleep 1
 echo "$(date "+%d.%m.%Y %T") INFO: *********************       Starting rclone_unmount script       *********************"
-echo "$(date "+%d.%m.%Y %T") INFO: Unmounting "/mnt/user/mount_rclone/g""
+echo "$(date "+%d.%m.%Y %T") INFO: Checking if this script is already running."
+if [[ -f "/mnt/user/appdata/other/rclone/rclone_unmount_running" ]]; then
+echo "$(date "+%d.%m.%Y %T") INFO: This script is already running."
+echo "$(date "+%d.%m.%Y %T") INFO: rclone_unmount STOPPED."
+exit
+else
+touch /mnt/user/appdata/other/rclone/rclone_unmount_running
+echo "$(date "+%d.%m.%Y %T") INFO: OK."
+fi
+sleep 1
+echo "$(date "+%d.%m.%Y %T") INFO: Unmounting \"/mnt/user/mount_rclone/g\""
 fusermount -uzq /mnt/user/mount_rclone/g
-echo "$(date "+%d.%m.%Y %T") INFO: Unmounting "/mnt/user/g""
-fusermount -uzq /mnt/user/g
-# Delay to let the mounts unmount. #
-echo "$(date "+%d.%m.%Y %T") INFO: Sleep 10 sec"
+echo "$(date "+%d.%m.%Y %T") INFO: Unmounting \"/mnt/user/g/drive\""
+fusermount -uzq /mnt/user/g/drive
+echo "$(date "+%d.%m.%Y %T") INFO: Delay 10 sec to let it unmount"
 sleep 10
 echo "$(date "+%d.%m.%Y %T") INFO: Continuing..."
 # Check if the unmount commands was successful #
 if [[ -f "/mnt/user/mount_rclone/g/mntchk" ]]; then
-echo "$(date "+%d.%m.%Y %T") CRITICAL: Unmounting "/mnt/user/mount_rclone/g" failed! Trying again."
+echo "$(date "+%d.%m.%Y %T") CRITICAL: Unmounting \"/mnt/user/mount_rclone/g\" failed! Trying again."
 fusermount -uz /mnt/user/mount_rclone/g
 else
-echo "$(date "+%d.%m.%Y %T") INFO: "/mnt/user/mount_rclone/g" is unmounted"
+echo "$(date "+%d.%m.%Y %T") INFO: \"/mnt/user/mount_rclone/g\" is unmounted"
 tree /mnt/user/mount_rclone/g -L 1
 fi
-if [[ -f "/mnt/user/g/mntchk" ]]; then
-echo "$(date "+%d.%m.%Y %T") CRITICAL: Unmounting "/mnt/user/g" failed! Trying again."
-fusermount -uz /mnt/user/g
+if [[ -f "/mnt/user/g/drive/mntchk" ]]; then
+echo "$(date "+%d.%m.%Y %T") CRITICAL: Unmounting \"/mnt/user/g/drive\" failed! Trying again."
+fusermount -uz /mnt/user/g/drive
 else
-echo "$(date "+%d.%m.%Y %T") INFO: "/mnt/user/g" is unmounted"
-tree /mnt/user/g -L 1
+echo "$(date "+%d.%m.%Y %T") INFO: \"/mnt/user/g/drive\" is unmounted"
+tree /mnt/user/g/drive -L 1
 fi
 #######################   Cleanup tracking files   #######################
 #
@@ -54,5 +65,12 @@ rm /mnt/user/appdata/other/rclone/rclone_mount_running
 else
 echo "rclone_mount_running tracker not present - script is not running"
 fi
+if [[ -f "/mnt/user/appdata/other/rclone/rclone_remount_running" ]]; then
+echo "rclone_remount_running pre﻿sent - removing tracker file"
+rm /mnt/user/appdata/other/rclone/rclone_remount_running
+else
+echo "rclone_unmount_running tracker not present - script is not running"
+fi
+rm /mnt/user/appdata/other/rclone/rclone_unmount_running
 echo "$(date "+%d.%m.%Y %T") INFO: ********************* rclone_unmount script finished successfully *********************"
 exit
