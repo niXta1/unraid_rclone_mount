@@ -5,14 +5,19 @@
 #
 ##################  Check if script is already running  ###################
 #
-sleep 10
+sleep 1
 echo "$(date "+%d.%m.%Y %T") INFO: *********************       Starting rclone_mount script       *********************"
+echo "$(date "+%d.%m.%Y %T") INFO: Delay 10s to let the array inizialize."
+sleep 10
 echo "$(date "+%d.%m.%Y %T") INFO: Checking if this script is already running."
 if [[ -f "/mnt/user/appdata/other/rclone/rclone_mount_running" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: This script is already running."
 echo "$(date "+%d.%m.%Y %T") INFO: rclone_mount STOPPED."
 exit
 else
+echo "$(date "+%d.%m.%Y %T") INFO: Creating folder \"/mnt/user/appdata/other/rclone\""
+sudo mkdir -p /mnt/user/appdata/other/rclone
+echo "$(date "+%d.%m.%Y %T") INFO: OK."
 touch /mnt/user/appdata/other/rclone/rclone_mount_running
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
 fi
@@ -25,28 +30,25 @@ echo "$(date "+%d.%m.%Y %T") INFO: rclone_mount STOPPED."
 else
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
 # create rclone & unionfs mount directories #
-echo "$(date "+%d.%m.%Y %T") INFO: Creating folder "/mnt/user/appdata/other/rclone""
-mkdir -p /mnt/user/appdata/other/rclone
+echo "$(date "+%d.%m.%Y %T") INFO: Creating folder "/mnt/user/g/drive""
+sudo -u nobody mkdir -p /mnt/user/g/drive
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
-echo "$(date "+%d.%m.%Y %T") INFO: Creating folder "/mnt/user/g""
-mkdir -p /mnt/user/g
+echo "$(date "+%d.%m.%Y %T") INFO: Creating folder \"/mnt/user/rclone_upload/g\""
+sudo -u nobody mkdir -p /mnt/user/rclone_upload/g
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
-echo "$(date "+%d.%m.%Y %T") INFO: Creating folder "/mnt/user/rclone_upload/g""
-mkdir -p /mnt/user/rclone_upload/g
+echo "$(date "+%d.%m.%Y %T") INFO: Creating folder \"/mnt/user/mount_rclone/g\""
+sudo -u nobody mkdir -p /mnt/user/mount_rclone/g
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
 echo "$(date "+%d.%m.%Y %T") INFO: Mounting rclone vfs"
 rclone mount --allow-other --buffer-size 256M --dir-cache-time 72h --drive-chunk-size 512M --fast-list --log-level INFO --vfs-read-chunk-size 128M --vfs-read-chunk-size-limit off gdrive_media_vfs: /mnt/user/mount_rclone/g &
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
-# short delay to let mount finalize #
-echo "$(date "+%d.%m.%Y %T") INFO: sleeping 10 sec"
-sleep 10
-echo "$(date "+%d.%m.%Y %T") INFO: continuing..."
-# checking if vfs was successfully mounted #
+echo "$(date "+%d.%m.%Y %T") INFO: sleeping 5 sec to let mount finalize"
+sleep 5
 echo "$(date "+%d.%m.%Y %T") INFO: Checking if vfs is mounted"
 if [[ -f "/mnt/user/mount_rclone/g/mntchk" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
 else
-echo "$(date "+%d.%m.%Y %T") CRITICAL: rclone vfs mount failed ("/mnt/user/mount_rclone/g/mntchk")"
+echo "$(date "+%d.%m.%Y %T") CRITICAL: rclone vfs mount failed (\"/mnt/user/mount_rclone/g/mntchk\")"
 rm /mnt/user/appdata/other/rclone/rclone_mount_running
 echo "$(date "+%d.%m.%Y %T") INFO: rclone_mount STOPPED."
 exit
@@ -54,18 +56,18 @@ fi
 fi
 #############################  Mount unionfs  #############################
 #
-if [[ -f "/mnt/user/g/mntchk" ]]; then
+if [[ -f "/mnt/user/g/drive/mntchk" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: unionfs is already mounted."
 else
 echo "$(date "+%d.%m.%Y %T") INFO: Checking for bad unmount:"
-tree "/mnt/user/g/" -a -L 1
+tree "/mnt/user/g/drive/" -a -L 1
 echo "$(date "+%d.%m.%Y %T") INFO: \"0 directory, 0 files\" = clean unmount."
 echo "$(date "+%d.%m.%Y %T") INFO: Will try to fix bad unmount if needed."
-find "/mnt/user/g/" -empty -type d -delete -maxdepth 2 -mindepth 1
+find "/mnt/user/g/drive/" -empty -type d -delete -maxdepth 2 -mindepth 1
 echo "$(date "+%d.%m.%Y %T") INFO: Mounting unionfs..."
-unionfs -o cow,allow_other,direct_io,auto_cache,sync_read /mnt/user/rclone_upload/g=RW:/mnt/user/mount_rclone/g=RO /mnt/user/g
+unionfs -o cow,allow_other,direct_io,auto_cache,sync_read /mnt/user/rclone_upload/g=RW:/mnt/user/mount_rclone/g=RO /mnt/user/g/drive
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
-if [[ -f "/mnt/user/g/mntchk" ]]; then
+if [[ -f "/mnt/user/g/drive/mntchk" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: Unionfs mounted."
 else
 echo "$(date "+%d.%m.%Y %T") CRITICAL: Unionfs Remount failed."
@@ -85,5 +87,6 @@ fi
 #docker start 'Plex-nvdec'
 #rm /mnt/user/appdata/other/rclone/rclone_mount_running
 #fi
+rm /mnt/user/appdata/other/rclone/rclone_mount_running
 echo "$(date "+%d.%m.%Y %T") INFO: ********************* rclone_mount script finished successfully *********************"
 exit
