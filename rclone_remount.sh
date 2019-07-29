@@ -1,0 +1,77 @@
+#!/bin/bash
+###########################################################################
+#                    <>       rclone_remount       <>                     #
+###########################################################################
+#
+##################  Check if script is already running  ###################
+#
+sleep 1
+echo "$(date "+%d.%m.%Y %T") INFO: *********************       Starting rclone_remount script       *********************"
+echo "$(date "+%d.%m.%Y %T") INFO: Checking if this script is already running."
+if [[ -f "/mnt/user/appdata/other/rclone/rclone_remount_running" ]]; then
+echo "$(date "+%d.%m.%Y %T") INFO: This script is already running."
+echo "$(date "+%d.%m.%Y %T") INFO: rclone_remount STOPPED."
+exit
+fi
+if [[ -f "/mnt/user/appdata/other/rclone/rclone_mount_running" ]]; then
+echo "$(date "+%d.%m.%Y %T") INFO: Exiting as rclone_mount is running."
+echo "$(date "+%d.%m.%Y %T") INFO: rclone_remount STOPPED."
+exit
+fi
+if [[ -f "/mnt/user/appdata/other/rclone/rclone_unmount_running" ]]; then
+echo "$(date "+%d.%m.%Y %T") INFO: Exiting as rclone_unmount is running."
+echo "$(date "+%d.%m.%Y %T") INFO: rclone_remount STOPPED."
+exit
+fi
+if [[ -f "/mnt/user/appdata/other/rclone/rclone_upload_running" ]]; then
+echo "$(date "+%d.%m.%Y %T") INFO: Exiting as rclone_upload is running."
+echo "$(date "+%d.%m.%Y %T") INFO: rclone_upload STOPPED."
+exit
+fi
+touch /mnt/user/appdata/other/rclone/rclone_remount_running
+echo "$(date "+%d.%m.%Y %T") INFO: OK."
+echo "$(date "+%d.%m.%Y %T") INFO: Checking if vfs is mounted"
+if [[ -f "/mnt/user/mount_rclone/g/mntchk" ]]; then
+echo "$(date "+%d.%m.%Y %T") INFO: OK."
+rm /mnt/user/appdata/other/rclone/rclone_remount_running
+echo "$(date "+%d.%m.%Y %T") INFO: ********************* rclone_remount script finished successfully *********************"
+exit
+else
+echo "$(date "+%d.%m.%Y %T") CRITICAL: rclone vfs mount has failed (\"/mnt/user/mount_rclone/g/mntchk\")"
+echo "$(date "+%d.%m.%Y %T") INFO: Unmounting \"/mnt/user/mount_rclone/g\""
+tree /mnt/user/mount_rclone/g -L 1
+fusermount -uzq /mnt/user/mount_rclone/g
+echo "$(date "+%d.%m.%Y %T") INFO: Delay 5 sec to let it unmount"
+sleep 5
+echo "$(date "+%d.%m.%Y %T") INFO: Continuing..."
+fi
+# Check if the unmount commands was successful #
+if [[ -f "/mnt/user/mount_rclone/g/mntchk" ]]; then
+echo "$(date "+%d.%m.%Y %T") CRITICAL: Unmounting \"/mnt/user/mount_rclone/g\" failed! Trying again."
+tree /mnt/user/mount_rclone/g -L 1
+fusermount -uz /mnt/user/mount_rclone/g
+else
+echo "$(date "+%d.%m.%Y %T") INFO: \"/mnt/user/mount_rclone/g\" is unmounted"
+fi
+tree /mnt/user/mount_rclone/g -L 1
+# Mount rclone vfs
+echo "$(date "+%d.%m.%Y %T") INFO: Creating folder \"/mnt/user/mount_rclone/g\""
+sudo -u nobody mkdir -p /mnt/user/mount_rclone/g
+echo "$(date "+%d.%m.%Y %T") INFO: OK."
+echo "$(date "+%d.%m.%Y %T") INFO: Mounting rclone vfs"
+rclone mount --allow-other --buffer-size 256M --dir-cache-time 72h --drive-chunk-size 512M --fast-list --log-level INFO --vfs-read-chunk-size 128M --vfs-read-chunk-size-limit off gdrive_media_vfs: /mnt/user/mount_rclone/g &
+echo "$(date "+%d.%m.%Y %T") INFO: OK."
+echo "$(date "+%d.%m.%Y %T") INFO: sleeping 5 sec to let mount finalize"
+sleep 5
+echo "$(date "+%d.%m.%Y %T") INFO: Checking if vfs is mounted"
+if [[ -f "/mnt/user/mount_rclone/g/mntchk" ]]; then
+echo "$(date "+%d.%m.%Y %T") INFO: OK."
+else
+echo "$(date "+%d.%m.%Y %T") CRITICAL: rclone vfs mount failed (\"/mnt/user/mount_rclone/g/mntchk\")"
+rm /mnt/user/appdata/other/rclone/rclone_remount_running
+echo "$(date "+%d.%m.%Y %T") INFO: rclone_remount STOPPED."
+exit
+fi
+rm /mnt/user/appdata/other/rclone/rclone_remount_running
+echo "$(date "+%d.%m.%Y %T") INFO: ********************* rclone_remount REMOUNTED VFS! *********************"
+exit
