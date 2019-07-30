@@ -5,10 +5,9 @@
 #
 ##################  Check if script is already running  ###################
 #
-sleep 1
 echo "$(date "+%d.%m.%Y %T") INFO: *********************       Starting rclone_mount script       *********************"
-echo "$(date "+%d.%m.%Y %T") INFO: Delay 10s to let the array inizialize."
-sleep 10
+echo "$(date "+%d.%m.%Y %T") INFO: Delay 2s to let the array inizialize."
+sleep 2
 echo "$(date "+%d.%m.%Y %T") INFO: Checking if this script is already running."
 if [[ -f "/mnt/user/appdata/other/rclone/rclone_mount_running" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: This script is already running."
@@ -19,7 +18,6 @@ echo "$(date "+%d.%m.%Y %T") INFO: Creating folder \"/mnt/user/appdata/other/rcl
 sudo mkdir -p /mnt/user/appdata/other/rclone
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
 touch /mnt/user/appdata/other/rclone/rclone_mount_running
-echo "$(date "+%d.%m.%Y %T") INFO: OK."
 fi
 #######################  Start rclone vfs mount  #######################
 #
@@ -40,11 +38,16 @@ echo "$(date "+%d.%m.%Y %T") INFO: Creating folder \"/mnt/user/mount_rclone/g\""
 sudo -u nobody mkdir -p /mnt/user/mount_rclone/g
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
 echo "$(date "+%d.%m.%Y %T") INFO: Mounting rclone vfs"
-rclone mount --allow-other --buffer-size 256M --dir-cache-time 72h --drive-chunk-size 512M --fast-list --log-level INFO --vfs-read-chunk-size 128M --vfs-read-chunk-size-limit off gdrive_media_vfs: /mnt/user/mount_rclone/g &
+rclone mount --allow-other --buffer-size 512M --dir-cache-time 72h --drive-chunk-size 512M --fast-list --log-level INFO --vfs-read-chunk-size 32M --vfs-read-chunk-size-limit 1G --rc gdrive_media_vfs: /mnt/user/mount_rclone/g &
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
-echo "$(date "+%d.%m.%Y %T") INFO: sleeping 5 sec to let mount finalize"
-sleep 5
+echo "$(date "+%d.%m.%Y %T") INFO: sleeping 2 sec to let mount finalize"
+sleep 2
 echo "$(date "+%d.%m.%Y %T") INFO: Checking if vfs is mounted"
+if [[ -f "/mnt/user/mount_rclone/g/mntchk" ]]; then
+echo "$(date "+%d.%m.%Y %T") INFO: OK."
+else
+echo "$(date "+%d.%m.%Y %T") INFO: sleeping 5 sec more to let mount finalize"
+sleep 5
 if [[ -f "/mnt/user/mount_rclone/g/mntchk" ]]; then
 echo "$(date "+%d.%m.%Y %T") INFO: OK."
 else
@@ -52,6 +55,7 @@ echo "$(date "+%d.%m.%Y %T") CRITICAL: rclone vfs mount failed (\"/mnt/user/moun
 rm /mnt/user/appdata/other/rclone/rclone_mount_running
 echo "$(date "+%d.%m.%Y %T") INFO: rclone_mount STOPPED."
 exit
+fi
 fi
 fi
 #############################  Mount unionfs  #############################
@@ -87,6 +91,8 @@ fi
 #docker start 'Plex-nvdec'
 #rm /mnt/user/appdata/other/rclone/rclone_mount_running
 #fi
+echo "$(date "+%d.%m.%Y %T") INFO: Refresh the directory listings."
+rclone rc vfs/refresh recursive=true
 rm /mnt/user/appdata/other/rclone/rclone_mount_running
 echo "$(date "+%d.%m.%Y %T") INFO: ********************* rclone_mount script finished successfully *********************"
 exit
